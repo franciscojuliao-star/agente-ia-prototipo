@@ -15,6 +15,20 @@ import Quiz from './pages/aluno/Quiz';
 import Flashcards from './pages/aluno/Flashcards';
 import Resumo from './pages/aluno/Resumo';
 import Historico from './pages/aluno/Historico';
+import AdminUsuarios from './pages/AdminUsuarios';
+
+function getDefaultRoute(role) {
+  switch (role) {
+    case 'ADMIN':
+      return '/admin/usuarios';
+    case 'PROFESSOR':
+      return '/professor/materiais';
+    case 'ALUNO':
+      return '/aluno/disciplinas';
+    default:
+      return '/login';
+  }
+}
 
 function PrivateRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -26,7 +40,7 @@ function PrivateRoute({ children, allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to={user.role === 'PROFESSOR' ? '/professor/materiais' : '/aluno/disciplinas'} />;
+    return <Navigate to={getDefaultRoute(user.role)} />;
   }
 
   return (
@@ -43,7 +57,7 @@ function PublicRoute({ children }) {
   if (loading) return <Loading />;
 
   if (user) {
-    return <Navigate to={user.role === 'PROFESSOR' ? '/professor/materiais' : '/aluno/disciplinas'} />;
+    return <Navigate to={getDefaultRoute(user.role)} />;
   }
 
   return children;
@@ -55,6 +69,9 @@ function AppRoutes() {
       {/* Public Routes */}
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/registro" element={<PublicRoute><Registro /></PublicRoute>} />
+
+      {/* Admin Routes */}
+      <Route path="/admin/usuarios" element={<PrivateRoute allowedRoles={['ADMIN']}><AdminUsuarios /></PrivateRoute>} />
 
       {/* Professor Routes */}
       <Route path="/professor/materiais" element={<PrivateRoute allowedRoles={['PROFESSOR']}><Materiais /></PrivateRoute>} />

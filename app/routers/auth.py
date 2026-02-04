@@ -90,6 +90,13 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Verifica se usuário está ativo
+    if not user.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Conta aguardando aprovação do administrador",
+        )
+
     # Gera tokens
     access_token = create_access_token(
         user_id=user.id,
@@ -136,6 +143,13 @@ async def refresh_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário não encontrado",
+        )
+
+    # Verifica se usuário está ativo
+    if not user.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Conta desativada pelo administrador",
         )
 
     # Gera novos tokens

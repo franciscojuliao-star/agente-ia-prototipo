@@ -68,4 +68,12 @@ export const getResumo = (id) => api.get(`/aluno/resumo/${id}`);
 export const buscarSemantica = (disciplina, pergunta) => api.post('/aluno/buscar', { disciplina, pergunta });
 export const getHistorico = () => api.get('/aluno/historico');
 
+// Admin
+export const getUsuarios = (ativo, role) => api.get('/admin/usuarios', { params: { ativo, role } });
+export const getUsuariosPendentes = () => api.get('/admin/usuarios/pendentes');
+export const aprovarUsuario = (id) => api.post(`/admin/usuarios/${id}/aprovar`);
+export const atualizarStatusUsuario = (id, ativo) => api.patch(`/admin/usuarios/${id}/status`, { ativo });
+export const excluirUsuario = (id) => api.delete(`/admin/usuarios/${id}`);
+export const getEstatisticas = () => api.get('/admin/estatisticas');
+
 export default api;

@@ -26,13 +26,19 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY alembic/ ./alembic/
 COPY alembic.ini .
+COPY scripts/ ./scripts/
+COPY docker-entrypoint.sh .
 
 # Criar diretórios necessários e ajustar permissões
 RUN mkdir -p uploads chroma_db \
+    && chmod +x docker-entrypoint.sh \
     && chown -R appuser:appuser /app
 
 # Trocar para usuário não-root
 USER appuser
+
+# Entrypoint para rodar migrações
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

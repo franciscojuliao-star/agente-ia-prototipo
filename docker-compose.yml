@@ -3,16 +3,17 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: ava_user
-      POSTGRES_PASSWORD: senha123
-      POSTGRES_DB: ava_db
+      POSTGRES_USER: ${POSTGRES_USER:-ava_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-senha123}
+      POSTGRES_DB: ${POSTGRES_DB:-ava_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ava_user -d ava_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ava_user} -d ${POSTGRES_DB:-ava_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # Ollama LLM
   ollama:
@@ -30,6 +31,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # Serviço para baixar o modelo
   ollama-pull:
@@ -51,17 +53,20 @@ services:
       ollama:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://ava_user:senha123@postgres:5432/ava_db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ava_user}:${POSTGRES_PASSWORD:-senha123}@postgres:5432/${POSTGRES_DB:-ava_db}
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_MODEL: llama3.2:3b
-      OLLAMA_TIMEOUT: 120
-      SECRET_KEY: sua-chave-secreta-mude-em-producao
+      OLLAMA_TIMEOUT: 300
+      SECRET_KEY: ${SECRET_KEY:-mude-esta-chave-em-producao}
       CHROMA_PERSIST_DIR: /app/chroma_db
+      ENVIRONMENT: production
+      DEBUG: "false"
     volumes:
       - chroma_data:/app/chroma_db
       - uploads_data:/app/uploads
     ports:
       - "8000:8000"
+    restart: unless-stopped
 
   # Frontend
   frontend:
@@ -70,6 +75,7 @@ services:
       - backend
     ports:
       - "80:80"
+    restart: unless-stopped
 
 volumes:
   postgres_data:

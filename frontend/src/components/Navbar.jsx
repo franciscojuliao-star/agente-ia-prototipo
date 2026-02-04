@@ -2,12 +2,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
-  const { user, logout, isProfessor } = useAuth();
+  const { user, logout, isProfessor, isAluno, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const getRoleBadgeClass = () => {
+    if (isAdmin) return 'bg-red-100 text-red-700';
+    if (isProfessor) return 'bg-purple-100 text-purple-700';
+    return 'bg-green-100 text-green-700';
   };
 
   return (
@@ -22,7 +28,12 @@ export default function Navbar() {
           {user && (
             <div className="flex items-center gap-6">
               <div className="flex gap-4">
-                {isProfessor ? (
+                {isAdmin && (
+                  <Link to="/admin/usuarios" className="text-gray-600 hover:text-blue-600">
+                    Usuários
+                  </Link>
+                )}
+                {isProfessor && (
                   <>
                     <Link to="/professor/materiais" className="text-gray-600 hover:text-blue-600">
                       Materiais
@@ -34,7 +45,8 @@ export default function Navbar() {
                       Pendentes
                     </Link>
                   </>
-                ) : (
+                )}
+                {isAluno && (
                   <>
                     <Link to="/aluno/disciplinas" className="text-gray-600 hover:text-blue-600">
                       Disciplinas
@@ -49,7 +61,7 @@ export default function Navbar() {
               <div className="flex items-center gap-3 border-l pl-6">
                 <span className="text-sm text-gray-600">
                   {user.email}
-                  <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${isProfessor ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                  <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${getRoleBadgeClass()}`}>
                     {user.role}
                   </span>
                 </span>

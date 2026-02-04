@@ -5,7 +5,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, String, func
+from sqlalchemy import Boolean, DateTime, Enum, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -14,6 +14,7 @@ from app.database import Base
 
 class UserRole(str, enum.Enum):
     """Tipos de usuário no sistema."""
+    ADMIN = "ADMIN"
     PROFESSOR = "PROFESSOR"
     ALUNO = "ALUNO"
 
@@ -40,6 +41,11 @@ class User(Base):
         Enum(UserRole),
         nullable=False,
         default=UserRole.ALUNO,
+    )
+    ativo: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,  # Usuários precisam ser aprovados pelo admin
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -71,4 +77,4 @@ class User(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<User(id={self.id}, email={self.email}, role={self.role})>"
+        return f"<User(id={self.id}, email={self.email}, role={self.role}, ativo={self.ativo})>"

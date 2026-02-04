@@ -98,6 +98,13 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
+    # Verifica se usuário está ativo
+    if not user.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Conta desativada ou aguardando aprovação",
+        )
+
     return user
 
 
@@ -143,6 +150,29 @@ async def get_current_aluno(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso permitido apenas para alunos",
+        )
+    return current_user
+
+
+async def get_current_admin(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    """
+    Dependency que verifica se o usuário atual é administrador.
+
+    Args:
+        current_user: Usuário autenticado
+
+    Returns:
+        Usuário administrador
+
+    Raises:
+        HTTPException: Se usuário não for administrador
+    """
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso permitido apenas para administradores",
         )
     return current_user
 

@@ -28,9 +28,28 @@ class UserResponse(BaseModel):
     email: str
     nome: str
     role: str
+    ativo: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class UserAdminResponse(BaseModel):
+    """Schema de resposta completo para administradores."""
+    id: uuid.UUID
+    email: str
+    nome: str
+    role: str
+    ativo: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class UserStatusUpdate(BaseModel):
+    """Schema para atualizar status do usuário (ativar/desativar)."""
+    ativo: bool
 
 
 class Token(BaseModel):
