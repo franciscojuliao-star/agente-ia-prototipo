@@ -10,6 +10,10 @@ while ! python -c "from app.database import engine; engine.connect()" 2>/dev/nul
 done
 echo "PostgreSQL conectado!"
 
+# Cria as tabelas no banco (se não existirem)
+echo "Criando tabelas..."
+python -c "from app.database import init_db; init_db()"
+
 # Executa migração para adicionar campo ativo e criar admin
 echo "Executando migração..."
 python scripts/migrate_add_admin.py
