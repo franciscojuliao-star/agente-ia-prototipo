@@ -60,9 +60,12 @@ Retorne APENAS um array JSON, sem texto adicional:
 IMPORTANTE: exatamente 1 alternativa com "correct": true por questão."""
 
     PROMPT_CONTEUDO_HTML = """Você é um especialista em educação online. A partir do conteúdo abaixo, \
-gere um conteúdo de aula formatado em HTML semântico, bem estruturado, \
-com títulos (h2, h3), parágrafos, listas e destaques onde apropriado. \
-Retorne apenas o HTML sem delimitadores de código.
+gere um conteúdo de aula formatado em HTML semântico.
+REGRAS OBRIGATÓRIAS:
+- Use SOMENTE tags HTML: <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>
+- NÃO use Markdown (proibido usar #, ##, *, **)
+- NÃO use delimitadores de código (proibido usar ```)
+- Comece diretamente com uma tag HTML, sem texto antes
 
 Conteúdo:
 {conteudo}"""
