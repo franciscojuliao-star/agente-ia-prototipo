@@ -50,6 +50,22 @@ Crie {num_cards} flashcards.
 Retorne JSON:
 {{"flashcards": [{{"frente": "pergunta", "verso": "resposta"}}]}}"""
 
+    PROMPT_QUIZ_DIRETO = """Material:
+{conteudo}
+
+Crie {num_questoes} questões de múltipla escolha.
+Retorne APENAS um array JSON, sem texto adicional:
+[{{"statement":"...","points":1,"alternatives":[{{"text":"...","correct":true}},{{"text":"...","correct":false}},{{"text":"...","correct":false}},{{"text":"...","correct":false}}]}}]
+Cada questão deve ter exatamente 4 alternativas, com apenas 1 correta."""
+
+    PROMPT_CONTEUDO_HTML = """Você é um especialista em educação online. A partir do conteúdo abaixo, \
+gere um conteúdo de aula formatado em HTML semântico, bem estruturado, \
+com títulos (h2, h3), parágrafos, listas e destaques onde apropriado. \
+Retorne apenas o HTML sem delimitadores de código.
+
+Conteúdo:
+{conteudo}"""
+
     def __init__(self) -> None:
         """Inicializa o serviço LLM."""
         self.base_url = settings.ollama_base_url
@@ -307,6 +323,67 @@ Retorne JSON:
                     raise
 
         raise LLMError("Falha ao gerar flashcards após múltiplas tentativas")
+
+
+    async def gerar_quiz_direto(
+        self,
+        conteudo: str,
+        num_questoes: int,
+    ) -> list[dict[str, Any]]:
+        """
+        Gera quiz a partir de conteúdo texto direto.
+        Retorna array no formato esperado pelo Spring Boot.
+        """
+        prompt = self.PROMPT_QUIZ_DIRETO.format(
+            conteudo=conteudo,
+            num_questoes=num_questoes,
+        )
+
+        for attempt in range(3):
+            try:
+                resposta = await self.gerar_resposta(prompt, temperature=0.3)
+
+                texto = resposta.strip()
+                texto = re.sub(r"(?s)```json\s*", "", texto)
+                texto = re.sub(r"```", "", texto).strip()
+
+                start = texto.find("[")
+                end = texto.rfind("]")
+                if start == -1 or end == -1:
+                    raise LLMError("Resposta não contém array JSON")
+
+                resultado = json.loads(texto[start:end + 1])
+                if not isinstance(resultado, list) or not resultado:
+                    raise LLMError("Array de questões vazio ou inválido")
+
+                return resultado
+
+            except LLMError as e:
+                logger.warning(f"Tentativa {attempt + 1} de gerar quiz direto falhou: {e}")
+                if attempt == 2:
+                    raise
+
+        raise LLMError("Falha ao gerar quiz direto após múltiplas tentativas")
+
+    async def gerar_conteudo_html(
+        self,
+        conteudo: str,
+    ) -> str:
+        """
+        Gera conteúdo de aula em HTML a partir de texto direto.
+        """
+        prompt = self.PROMPT_CONTEUDO_HTML.format(conteudo=conteudo)
+
+        resposta = await self.gerar_resposta(
+            prompt,
+            system_prompt="Você é um especialista em educação online. Gere HTML semântico bem estruturado.",
+            temperature=0.4,
+        )
+
+        html = resposta.strip()
+        html = re.sub(r"(?s)```html\s*", "", html)
+        html = re.sub(r"```", "", html).strip()
+        return html
 
 
 # Função helper para obter instância

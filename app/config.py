@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 7
 
+    # Integração com sistemas externos (service-to-service)
+    api_key_integracoes: str = "integracoes-dev-key-mude-em-producao"
+
     # Application Settings
     max_upload_size_mb: int = 50
     rate_limit_per_minute: int = 10

@@ -122,3 +122,34 @@ class DisciplinaResponse(BaseModel):
 class DisciplinasListResponse(BaseModel):
     """Schema de lista de disciplinas."""
     disciplinas: list[DisciplinaResponse]
+
+
+# --- Schemas para integração direta (Spring Boot / sistemas externos) ---
+
+class GerarQuizDiretoRequest(BaseModel):
+    """Geração de quiz a partir de conteúdo texto direto, sem RAG."""
+    conteudo: str = Field(..., min_length=50, max_length=50000)
+    quantidade: int = Field(default=5, ge=1, le=20)
+
+
+class AlternativaDiretaResponse(BaseModel):
+    """Alternativa de questão no formato esperado pelo Spring Boot."""
+    text: str
+    correct: bool
+
+
+class QuestaosDiretaResponse(BaseModel):
+    """Questão no formato esperado pelo Spring Boot."""
+    statement: str
+    points: int = 1
+    alternatives: list[AlternativaDiretaResponse]
+
+
+class GerarConteudoDiretoRequest(BaseModel):
+    """Geração de conteúdo HTML a partir de texto direto, sem RAG."""
+    conteudo: str = Field(..., min_length=50, max_length=50000)
+
+
+class ConteudoHTMLResponse(BaseModel):
+    """Resposta com conteúdo HTML gerado."""
+    conteudo_html: str

@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.database import init_db
-from app.routers import auth_router, materiais_router, conteudos_router, alunos_router, admin_router
+from app.routers import auth_router, materiais_router, conteudos_router, alunos_router, admin_router, integracao_router
 
 # Configuração de logging
 logging.basicConfig(
@@ -113,6 +113,7 @@ app.include_router(materiais_router)
 app.include_router(conteudos_router)
 app.include_router(alunos_router)
 app.include_router(admin_router)
+app.include_router(integracao_router)
 
 
 # Rota de health check
