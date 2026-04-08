@@ -54,9 +54,10 @@ Retorne JSON:
 {conteudo}
 
 Crie {num_questoes} questões de múltipla escolha.
+Cada questão deve ter exatamente 4 alternativas, com apenas 1 correta.
 Retorne APENAS um array JSON, sem texto adicional:
 [{{"statement":"...","points":1,"alternatives":[{{"text":"...","correct":true}},{{"text":"...","correct":false}},{{"text":"...","correct":false}},{{"text":"...","correct":false}}]}}]
-Cada questão deve ter exatamente 4 alternativas, com apenas 1 correta."""
+IMPORTANTE: exatamente 1 alternativa com "correct": true por questão."""
 
     PROMPT_CONTEUDO_HTML = """Você é um especialista em educação online. A partir do conteúdo abaixo, \
 gere um conteúdo de aula formatado em HTML semântico, bem estruturado, \
@@ -355,6 +356,13 @@ Conteúdo:
                 resultado = json.loads(texto[start:end + 1])
                 if not isinstance(resultado, list) or not resultado:
                     raise LLMError("Array de questões vazio ou inválido")
+
+                for i, q in enumerate(resultado):
+                    corretas = sum(1 for a in q.get("alternatives", []) if a.get("correct") is True)
+                    if corretas != 1:
+                        raise LLMError(
+                            f"Questão {i + 1} tem {corretas} alternativa(s) correta(s), esperado exatamente 1"
+                        )
 
                 return resultado
 
